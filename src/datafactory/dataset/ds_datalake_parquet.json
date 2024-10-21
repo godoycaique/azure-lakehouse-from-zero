@@ -19,7 +19,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"folderPath": {
-					"value": "@concat('unitycatalog', dataset().path)",
+					"value": "@concat('unitycatalog/', dataset().path)",
 					"type": "Expression"
 				},
 				"fileSystem": {
