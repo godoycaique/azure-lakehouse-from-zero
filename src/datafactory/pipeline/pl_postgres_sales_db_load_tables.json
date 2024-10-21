@@ -1,0 +1,139 @@
+{
+	"name": "pl_postgres_sales_db_load_tables",
+	"properties": {
+		"activities": [
+			{
+				"name": "set container",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "set tables",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "container",
+					"value": "bronze"
+				}
+			},
+			{
+				"name": "set path",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "set tables",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "path",
+					"value": "postgres/sales_db"
+				}
+			},
+			{
+				"name": "For each table",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "set container",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "set path",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('tables')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "load tables",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "pl_postgres_sales_db_generic_load",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"table": {
+										"value": "@item()",
+										"type": "Expression"
+									},
+									"target_container": {
+										"value": "@variables('container')",
+										"type": "Expression"
+									},
+									"target_path": {
+										"value": "@concat(variables('path'), '/', item())",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "set tables",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "tables",
+					"value": [
+						"dim_custmomer",
+						"dim_products",
+						"fact_sales"
+					]
+				}
+			}
+		],
+		"variables": {
+			"container": {
+				"type": "String"
+			},
+			"path": {
+				"type": "String"
+			},
+			"tables": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "postgres_salesdb"
+		},
+		"annotations": []
+	}
+}
