@@ -115,8 +115,7 @@
 					"variableName": "tables",
 					"value": [
 						"dim_customers",
-						"dim_products",
-						"fact_sales"
+						"dim_products"
 					]
 				}
 			}
