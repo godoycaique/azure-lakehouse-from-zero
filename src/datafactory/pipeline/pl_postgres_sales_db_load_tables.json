@@ -114,7 +114,7 @@
 				"typeProperties": {
 					"variableName": "tables",
 					"value": [
-						"dim_custmomer",
+						"dim_custmomers",
 						"dim_products",
 						"fact_sales"
 					]
