@@ -1,0 +1,41 @@
+{
+	"name": "pl_postgres_sales_db_fact_sales_load",
+	"properties": {
+		"activities": [
+			{
+				"name": "load tables",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_postgres_sales_db_generic_load",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"table": {
+							"value": "@item()",
+							"type": "Expression"
+						},
+						"target_container": {
+							"value": "@variables('container')",
+							"type": "Expression"
+						},
+						"target_path": {
+							"value": "@variables('path')",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "postgres_salesdb/fact_sales"
+		},
+		"annotations": []
+	}
+}

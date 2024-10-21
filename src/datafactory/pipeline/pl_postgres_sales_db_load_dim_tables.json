@@ -132,7 +132,7 @@
 			}
 		},
 		"folder": {
-			"name": "postgres_salesdb"
+			"name": "postgres_salesdb/fact_sales"
 		},
 		"annotations": []
 	}

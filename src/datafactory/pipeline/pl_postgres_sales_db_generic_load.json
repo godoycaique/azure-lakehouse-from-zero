@@ -83,8 +83,19 @@
 				"type": "string"
 			}
 		},
+		"variables": {
+			"container": {
+				"type": "String"
+			},
+			"path": {
+				"type": "String"
+			},
+			"tables": {
+				"type": "Array"
+			}
+		},
 		"folder": {
-			"name": "postgres_salesdb"
+			"name": "postgres_salesdb/generic"
 		},
 		"annotations": []
 	}
