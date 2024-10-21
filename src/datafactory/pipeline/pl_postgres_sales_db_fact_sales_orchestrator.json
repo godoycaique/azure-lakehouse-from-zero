@@ -3,33 +3,61 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "load delta fact_sales",
-				"type": "ExecutePipeline",
+				"name": "full or delta",
+				"type": "Switch",
 				"dependsOn": [],
-				"policy": {
-					"secureInput": false
-				},
 				"userProperties": [],
 				"typeProperties": {
-					"pipeline": {
-						"referenceName": "pl_postgres_sales_db_generic_delta",
-						"type": "PipelineReference"
+					"on": {
+						"value": "@pipeline().parameters.load_type",
+						"type": "Expression"
 					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"date_from": {
-							"value": "@formatDateTime(addDays(utcNow(), -3), 'yyyyMMdd')",
-							"type": "Expression"
+					"cases": [
+						{
+							"value": "full"
 						},
-						"date_to": {
-							"value": "@formatDateTime(addDays(utcNow(), -1), 'yyyyMMdd')\n",
-							"type": "Expression"
-						},
-						"table": "fact_sales"
-					}
+						{
+							"value": "delta",
+							"activities": [
+								{
+									"name": "load delta fact_sales",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "pl_postgres_sales_db_generic_delta",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"date_from": {
+												"value": "@formatDateTime(addDays(utcNow(), -3), 'yyyyMMdd')",
+												"type": "Expression"
+											},
+											"date_to": {
+												"value": "@formatDateTime(addDays(utcNow(), -1), 'yyyyMMdd')\n",
+												"type": "Expression"
+											},
+											"table": "fact_sales"
+										}
+									}
+								}
+							]
+						}
+					]
 				}
 			}
 		],
+		"parameters": {
+			"load_type": {
+				"type": "string",
+				"defaultValue": "delta"
+			}
+		},
 		"variables": {
 			"date_from": {
 				"type": "String"
