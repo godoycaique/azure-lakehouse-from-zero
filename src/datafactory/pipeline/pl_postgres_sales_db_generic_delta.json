@@ -18,7 +18,7 @@
 					"source": {
 						"type": "PostgreSqlV2Source",
 						"query": {
-							"value": "@concat('\n    SELECT \n        *\n    FROM \n        public.',pipeline().parameters.table,'\n    WHERE \n        TO_DATE(order_date, \"DD/MM/YYYY\") between',pipeline().parameters.date_from, 'and', pipeline().parameters.date_to)",
+							"value": "@concat('\n    SELECT \n        *\n    FROM \n        public.',pipeline().parameters.table,'\n    WHERE \n        TO_DATE(order_date, \"DD/MM/YYYY\") between ',pipeline().parameters.date_from, ' and ', pipeline().parameters.date_to)",
 							"type": "Expression"
 						}
 					},
