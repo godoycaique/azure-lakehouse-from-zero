@@ -1,0 +1,43 @@
+{
+	"name": "pl_postgres_sales_db_fact_sales_orchestrator",
+	"properties": {
+		"activities": [
+			{
+				"name": "load fact_sales delta",
+				"description": "get delta date from d-3",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_postgres_sales_db_fact_sales_delta",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"date_from": {
+							"value": "@formatDateTime(addDays(utcNow(), -3), 'yyyyMMdd')",
+							"type": "Expression"
+						},
+						"date_to": {
+							"value": "@formatDateTime(addDays(utcNow(), -1), 'yyyyMMdd')\n",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"variables": {
+			"date_from": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "postgres_salesdb/fact_sales"
+		},
+		"annotations": []
+	}
+}
