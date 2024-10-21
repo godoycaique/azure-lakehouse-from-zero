@@ -1,8 +1,88 @@
 {
-	"name": "pl_postgres_sales_db_fact_sales_delta",
+	"name": "pl_postgres_sales_db_generic_delta",
 	"properties": {
+		"activities": [
+			{
+				"name": "postgres db load tables",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "PostgreSqlV2Source",
+						"query": {
+							"value": "@concat('\n    SELECT \n        *\n    FROM \n        public.',pipeline().parameters.table,'\n    WHERE \n        order_date between', pipeline().parameters.date_from, 'and', pipeline().parameters.date_to)",
+							"type": "Expression"
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_postgres_db_read",
+						"type": "DatasetReference",
+						"parameters": {
+							"server": " dpg-csb9dojv2p9s739qbkd0-a.oregon-postgres.render.com",
+							"database": "salesdb_h0qa",
+							"user": "salesdb",
+							"password": "SCZ5iAdmiqdrkL2aB8XraPnh3fdUIvzf",
+							"schema": "public",
+							"table": {
+								"value": "@pipeline().parameters.table",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_datalake_parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "raw",
+							"path": "postgres/sales_db"
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"date_from": {
+				"type": "string"
+			},
+			"date_to": {
+				"type": "string"
+			},
+			"table": {
+				"type": "string"
+			}
+		},
 		"folder": {
-			"name": "postgres_salesdb/fact_sales"
+			"name": "postgres_salesdb/generic"
 		},
 		"annotations": []
 	}
