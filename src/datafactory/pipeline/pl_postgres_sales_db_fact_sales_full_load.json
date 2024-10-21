@@ -1,5 +1,5 @@
 {
-	"name": "pl_postgres_sales_db_fact_sales_load",
+	"name": "pl_postgres_sales_db_fact_sales_full_load",
 	"properties": {
 		"activities": [
 			{
@@ -17,18 +17,9 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"table": {
-							"value": "@item()",
-							"type": "Expression"
-						},
-						"target_container": {
-							"value": "@variables('container')",
-							"type": "Expression"
-						},
-						"target_path": {
-							"value": "@variables('path')",
-							"type": "Expression"
-						}
+						"table": "fact_sales",
+						"target_container": "raw",
+						"target_path": "postgres/sales_db/fact_sales"
 					}
 				}
 			}
