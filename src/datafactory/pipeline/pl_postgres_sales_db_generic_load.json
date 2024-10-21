@@ -29,7 +29,11 @@
 							"database": "salesdb_h0qa",
 							"user": "salesdb",
 							"password": "SCZ5iAdmiqdrkL2aB8XraPnh3fdUIvzf",
-							"schema": "public"
+							"schema": "public",
+							"table": {
+								"value": "@pipeline().parameters.table",
+								"type": "Expression"
+							}
 						}
 					}
 				]
