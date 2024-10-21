@@ -5,9 +5,17 @@
 			{
 				"name": "load tables",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "set date_from",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "set date_to",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -24,6 +32,14 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
+						"date_from": {
+							"value": "@variables('date_from')",
+							"type": "Expression"
+						},
+						"date_to": {
+							"value": "@variables('date_to')",
+							"type": "Expression"
+						},
 						"table": "fact_sales"
 					}
 				}
@@ -40,12 +56,37 @@
 				"typeProperties": {
 					"variableName": "date_from",
 					"value": {
-						"value": "@concat(substring(variables('date_from'), 6, 2), '/', substring(variables('date_from'), 4, 2), '/', substring(variables('date_from'), 0, 4))",
+						"value": "@concat(substring(pipeline().parameters.date_from, 6, 2), '/', substring(pipeline().parameters.date_from, 4, 2), '/', substring(pipeline().parameters.date_from, 0, 4))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "set date_to",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "date_to",
+					"value": {
+						"value": "@concat(substring(pipeline().parameters.date_to, 6, 2), '/', substring(pipeline().parameters.date_to, 4, 2), '/', substring(pipeline().parameters.date_to, 0, 4))",
 						"type": "Expression"
 					}
 				}
 			}
 		],
+		"parameters": {
+			"date_from": {
+				"type": "string"
+			},
+			"date_to": {
+				"type": "string"
+			}
+		},
 		"variables": {
 			"date_from": {
 				"type": "String",
