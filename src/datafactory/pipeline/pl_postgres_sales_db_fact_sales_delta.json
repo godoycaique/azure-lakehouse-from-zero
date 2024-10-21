@@ -5,8 +5,6 @@
 			{
 				"name": "load tables",
 				"type": "ExecutePipeline",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "set date_from",
