@@ -1,5 +1,5 @@
 {
-	"name": "pl_postgres_sales_db_fact_sales_full_load_copy1",
+	"name": "pl_postgres_sales_db_fact_sales_delta",
 	"properties": {
 		"activities": [
 			{
