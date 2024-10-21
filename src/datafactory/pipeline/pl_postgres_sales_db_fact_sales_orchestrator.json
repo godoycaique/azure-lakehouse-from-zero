@@ -14,7 +14,30 @@
 					},
 					"cases": [
 						{
-							"value": "full"
+							"value": "full",
+							"activities": [
+								{
+									"name": "load full fact_sales",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "pl_postgres_sales_db_generic_load",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"table": "fact_sales",
+											"target_container": "raw",
+											"target_path": "postgres/sales_db"
+										}
+									}
+								}
+							]
 						},
 						{
 							"value": "delta",
