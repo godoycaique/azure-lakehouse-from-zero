@@ -20,7 +20,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"variableName": "container",
-					"value": "bronze"
+					"value": "raw"
 				}
 			},
 			{
@@ -67,6 +67,7 @@
 						"value": "@variables('tables')",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "load tables",
