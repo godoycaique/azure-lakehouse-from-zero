@@ -1,0 +1,9 @@
+{
+	"name": "pl_postgres_sales_db_fact_sales_delta",
+	"properties": {
+		"folder": {
+			"name": "postgres_salesdb/fact_sales"
+		},
+		"annotations": []
+	}
+}
