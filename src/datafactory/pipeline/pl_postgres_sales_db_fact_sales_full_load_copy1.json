@@ -48,10 +48,12 @@
 		],
 		"variables": {
 			"date_from": {
-				"type": "String"
+				"type": "String",
+				"defaultValue": "20241010"
 			},
 			"date_to": {
-				"type": "String"
+				"type": "String",
+				"defaultValue": "20241020"
 			}
 		},
 		"folder": {
