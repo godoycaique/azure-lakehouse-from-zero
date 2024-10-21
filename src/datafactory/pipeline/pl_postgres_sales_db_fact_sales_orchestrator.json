@@ -3,8 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "load fact_sales delta",
-				"description": "get delta date from d-3",
+				"name": "load delta fact_sales",
 				"type": "ExecutePipeline",
 				"dependsOn": [],
 				"policy": {
@@ -13,7 +12,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "pl_postgres_sales_db_fact_sales_delta",
+						"referenceName": "pl_postgres_sales_db_generic_delta",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
@@ -25,7 +24,8 @@
 						"date_to": {
 							"value": "@formatDateTime(addDays(utcNow(), -1), 'yyyyMMdd')\n",
 							"type": "Expression"
-						}
+						},
+						"table": "fact_sales"
 					}
 				}
 			}
