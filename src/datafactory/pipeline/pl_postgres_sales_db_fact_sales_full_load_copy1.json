@@ -1,0 +1,62 @@
+{
+	"name": "pl_postgres_sales_db_fact_sales_full_load_copy1",
+	"properties": {
+		"activities": [
+			{
+				"name": "load tables",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "set date_from",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_postgres_sales_db_generic_delta",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"table": "fact_sales"
+					}
+				}
+			},
+			{
+				"name": "set date_from",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "date_from",
+					"value": {
+						"value": "@concat(substring(variables('date_from'), 6, 2), '/', substring(variables('date_from'), 4, 2), '/', substring(variables('date_from'), 0, 4))",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"date_from": {
+				"type": "String"
+			},
+			"date_to": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "postgres_salesdb/fact_sales"
+		},
+		"annotations": []
+	}
+}
