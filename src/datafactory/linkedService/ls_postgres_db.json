@@ -1,0 +1,41 @@
+{
+	"name": "ls_postgres_db",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"parameters": {
+			"server": {
+				"type": "string"
+			},
+			"database": {
+				"type": "string"
+			},
+			"user": {
+				"type": "string"
+			},
+			"password": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "PostgreSqlV2",
+		"typeProperties": {
+			"server": "@{linkedService().server}",
+			"port": 5432,
+			"database": "@{linkedService().database}",
+			"username": "@{linkedService().user}",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "kv_dataplatform",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": {
+					"value": "@linkedService().password",
+					"type": "Expression"
+				}
+			},
+			"sslMode": 2,
+			"authenticationType": "Basic"
+		}
+	}
+}

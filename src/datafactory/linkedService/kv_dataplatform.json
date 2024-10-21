@@ -1,0 +1,11 @@
+{
+	"name": "kv_dataplatform",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://akvdataplatformdev2.vault.azure.net/"
+		}
+	}
+}
