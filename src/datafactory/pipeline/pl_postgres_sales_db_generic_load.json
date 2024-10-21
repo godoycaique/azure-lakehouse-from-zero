@@ -18,7 +18,24 @@
 					"source": {
 						"type": "PostgreSqlV2Source"
 					},
-					"enableStaging": false
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
 				},
 				"inputs": [
 					{
@@ -36,11 +53,33 @@
 							}
 						}
 					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_datalake_parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.target_container",
+								"type": "Expression"
+							},
+							"path": {
+								"value": "@concat(pipeline().parameters.target_path, '/', pipeline().parameters.table)",
+								"type": "Expression"
+							}
+						}
+					}
 				]
 			}
 		],
 		"parameters": {
 			"table": {
+				"type": "string"
+			},
+			"target_container": {
+				"type": "string"
+			},
+			"target_path": {
 				"type": "string"
 			}
 		},
