@@ -1,5 +1,5 @@
 {
-	"name": "pl_postgres_sales_db_load_tables",
+	"name": "pl_postgres_sales_db_load_dim_tables",
 	"properties": {
 		"activities": [
 			{
