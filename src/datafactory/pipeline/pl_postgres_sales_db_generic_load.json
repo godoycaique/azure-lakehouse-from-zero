@@ -1,5 +1,5 @@
 {
-	"name": "pl_postgres_sales_db_load",
+	"name": "pl_postgres_sales_db_generic_load",
 	"properties": {
 		"activities": [
 			{
