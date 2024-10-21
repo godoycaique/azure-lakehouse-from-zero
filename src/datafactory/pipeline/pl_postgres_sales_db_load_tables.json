@@ -93,7 +93,7 @@
 										"type": "Expression"
 									},
 									"target_path": {
-										"value": "@concat(variables('path'), '/', item())",
+										"value": "@variables('path')",
 										"type": "Expression"
 									}
 								}
@@ -114,7 +114,7 @@
 				"typeProperties": {
 					"variableName": "tables",
 					"value": [
-						"dim_custmomers",
+						"dim_customers",
 						"dim_products",
 						"fact_sales"
 					]
