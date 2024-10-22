@@ -1,0 +1,692 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adfdataplatformdev"
+		},
+		"ls_datalake_dataplatform_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_datalake_dataplatform'"
+		},
+		"kv_dataplatform_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://akvdataplatformdev2.vault.azure.net/"
+		},
+		"ls_datalake_dataplatform_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adlsdataplatformdev.dfs.core.windows.net/"
+		},
+		"ls_postgres_db_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "@{linkedService().server}"
+		},
+		"ls_postgres_db_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "@{linkedService().database}"
+		},
+		"ls_postgres_db_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "@{linkedService().user}"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/kv_dataplatform')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('kv_dataplatform_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_datalake_dataplatform')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_datalake_dataplatform_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_datalake_dataplatform_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_datalake_parquet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_datalake_dataplatform",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"container": {
+						"type": "string"
+					},
+					"path": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat('unitycatalog/', dataset().path)",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_datalake_dataplatform')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_postgres_db')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"server": {
+						"type": "string"
+					},
+					"database": {
+						"type": "string"
+					},
+					"user": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "PostgreSqlV2",
+				"typeProperties": {
+					"server": "[parameters('ls_postgres_db_properties_typeProperties_server')]",
+					"port": 5432,
+					"database": "[parameters('ls_postgres_db_properties_typeProperties_database')]",
+					"username": "[parameters('ls_postgres_db_properties_typeProperties_username')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "kv_dataplatform",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": {
+							"value": "@linkedService().password",
+							"type": "Expression"
+						}
+					},
+					"sslMode": 2,
+					"authenticationType": "Basic"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/kv_dataplatform')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_postgres_db_read')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_postgres_db",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"server": {
+							"value": "@dataset().server",
+							"type": "Expression"
+						},
+						"database": {
+							"value": "@dataset().database",
+							"type": "Expression"
+						},
+						"user": {
+							"value": "@dataset().user",
+							"type": "Expression"
+						},
+						"password": {
+							"value": "@dataset().password",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"server": {
+						"type": "string"
+					},
+					"database": {
+						"type": "string"
+					},
+					"user": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"schema": {
+						"type": "string"
+					},
+					"table": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "PostgreSqlV2Table",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_postgres_db')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_postgres_sales_db_generic_delta')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "postgres db load tables",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "PostgreSqlV2Source",
+								"query": {
+									"value": "SELECT \n    *\nFROM \n    public.@{pipeline().parameters.table}\nWHERE \n    TO_DATE(order_date, 'DD/MM/YYYY') \n    between '@{pipeline().parameters.date_from}' \n    and '@{pipeline().parameters.date_to}'",
+									"type": "Expression"
+								}
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ds_postgres_db_read",
+								"type": "DatasetReference",
+								"parameters": {
+									"server": " dpg-csb9dojv2p9s739qbkd0-a.oregon-postgres.render.com",
+									"database": "salesdb_h0qa",
+									"user": "salesdb",
+									"password": "db-postgres-sales-password",
+									"schema": "public",
+									"table": {
+										"value": "@pipeline().parameters.table",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ds_datalake_parquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().parameters.target_container",
+										"type": "Expression"
+									},
+									"path": {
+										"value": "@concat(pipeline().parameters.target_path, '/', pipeline().parameters.table)",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"date_from": {
+						"type": "string"
+					},
+					"date_to": {
+						"type": "string"
+					},
+					"table": {
+						"type": "string"
+					},
+					"target_container": {
+						"type": "string"
+					},
+					"target_path": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "postgres_salesdb/generic"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_postgres_db_read')]",
+				"[concat(variables('factoryId'), '/datasets/ds_datalake_parquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_postgres_sales_db_generic_load')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "postgres db load tables",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "PostgreSqlV2Source"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ds_postgres_db_read",
+								"type": "DatasetReference",
+								"parameters": {
+									"server": " dpg-csb9dojv2p9s739qbkd0-a.oregon-postgres.render.com",
+									"database": "salesdb_h0qa",
+									"user": "salesdb",
+									"password": "db-postgres-sales-password",
+									"schema": "public",
+									"table": {
+										"value": "@pipeline().parameters.table",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ds_datalake_parquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().parameters.target_container",
+										"type": "Expression"
+									},
+									"path": {
+										"value": "@concat(pipeline().parameters.target_path, '/', pipeline().parameters.table)",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"table": {
+						"type": "string"
+					},
+					"target_container": {
+						"type": "string"
+					},
+					"target_path": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"container": {
+						"type": "String"
+					},
+					"path": {
+						"type": "String"
+					},
+					"tables": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "postgres_salesdb/generic"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_postgres_db_read')]",
+				"[concat(variables('factoryId'), '/datasets/ds_datalake_parquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_postgres_sales_db_fact_sales_orchestrator')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "full or delta",
+						"type": "Switch",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"on": {
+								"value": "@pipeline().parameters.load_type",
+								"type": "Expression"
+							},
+							"cases": [
+								{
+									"value": "full",
+									"activities": [
+										{
+											"name": "load full fact_sales",
+											"type": "ExecutePipeline",
+											"dependsOn": [],
+											"policy": {
+												"secureInput": false
+											},
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "pl_postgres_sales_db_generic_load",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"table": "fact_sales",
+													"target_container": "raw",
+													"target_path": "postgres/sales_db"
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "delta",
+									"activities": [
+										{
+											"name": "load delta fact_sales",
+											"type": "ExecutePipeline",
+											"dependsOn": [],
+											"policy": {
+												"secureInput": false
+											},
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "pl_postgres_sales_db_generic_delta",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"date_from": {
+														"value": "@formatDateTime(addDays(utcNow(), -3), 'yyyyMMdd')",
+														"type": "Expression"
+													},
+													"date_to": {
+														"value": "@formatDateTime(addDays(utcNow(), -1), 'yyyyMMdd')\n",
+														"type": "Expression"
+													},
+													"table": "fact_sales",
+													"target_container": "raw",
+													"target_path": "postgres/sales_db"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"load_type": {
+						"type": "string",
+						"defaultValue": "delta"
+					}
+				},
+				"variables": {
+					"date_from": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "postgres_salesdb/fact_sales"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pl_postgres_sales_db_generic_load')]",
+				"[concat(variables('factoryId'), '/pipelines/pl_postgres_sales_db_generic_delta')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_postgres_sales_db_load_dim_tables')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "set container",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "set tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "container",
+							"value": "raw"
+						}
+					},
+					{
+						"name": "set path",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "set tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "path",
+							"value": "postgres/sales_db"
+						}
+					},
+					{
+						"name": "For each table",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "set container",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "set path",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@variables('tables')",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "load tables",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "pl_postgres_sales_db_generic_load",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"table": {
+												"value": "@item()",
+												"type": "Expression"
+											},
+											"target_container": {
+												"value": "@variables('container')",
+												"type": "Expression"
+											},
+											"target_path": {
+												"value": "@variables('path')",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "set tables",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "tables",
+							"value": [
+								"dim_customers",
+								"dim_products"
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"container": {
+						"type": "String"
+					},
+					"path": {
+						"type": "String"
+					},
+					"tables": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "postgres_salesdb/dimensions"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pl_postgres_sales_db_generic_load')]"
+			]
+		}
+	]
+}
