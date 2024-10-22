@@ -65,7 +65,9 @@
 												"value": "@formatDateTime(addDays(utcNow(), -1), 'yyyyMMdd')\n",
 												"type": "Expression"
 											},
-											"table": "fact_sales"
+											"table": "fact_sales",
+											"target_container": "raw",
+											"target_path": "postgres/sales_db"
 										}
 									}
 								}
