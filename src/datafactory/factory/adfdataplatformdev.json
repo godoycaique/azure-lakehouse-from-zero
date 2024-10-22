@@ -1,0 +1,9 @@
+{
+	"name": "adfdataplatformdev",
+	"location": "westus2",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "c44a136f-d724-4ddb-b4bc-5c395551a5c4",
+		"tenantId": "72b11611-4bce-4682-9141-047e1590910d"
+	}
+}

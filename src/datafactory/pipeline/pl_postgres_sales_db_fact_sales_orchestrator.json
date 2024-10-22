@@ -1,0 +1,96 @@
+{
+	"name": "pl_postgres_sales_db_fact_sales_orchestrator",
+	"properties": {
+		"activities": [
+			{
+				"name": "full or delta",
+				"type": "Switch",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@pipeline().parameters.load_type",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "full",
+							"activities": [
+								{
+									"name": "load full fact_sales",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "pl_postgres_sales_db_generic_load",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"table": "fact_sales",
+											"target_container": "raw",
+											"target_path": "postgres/sales_db"
+										}
+									}
+								}
+							]
+						},
+						{
+							"value": "delta",
+							"activities": [
+								{
+									"name": "load delta fact_sales",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "pl_postgres_sales_db_generic_delta",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"date_from": {
+												"value": "@formatDateTime(addDays(utcNow(), -3), 'yyyyMMdd')",
+												"type": "Expression"
+											},
+											"date_to": {
+												"value": "@formatDateTime(addDays(utcNow(), -1), 'yyyyMMdd')\n",
+												"type": "Expression"
+											},
+											"table": "fact_sales",
+											"target_container": "raw",
+											"target_path": "postgres/sales_db"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"load_type": {
+				"type": "string",
+				"defaultValue": "delta"
+			}
+		},
+		"variables": {
+			"date_from": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "postgres_salesdb/fact_sales"
+		},
+		"annotations": []
+	}
+}
