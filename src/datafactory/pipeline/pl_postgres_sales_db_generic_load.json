@@ -45,7 +45,7 @@
 							"server": " dpg-csb9dojv2p9s739qbkd0-a.oregon-postgres.render.com",
 							"database": "salesdb_h0qa",
 							"user": "salesdb",
-							"password": "SCZ5iAdmiqdrkL2aB8XraPnh3fdUIvzf",
+							"password": "db-postgres-sales-password",
 							"schema": "public",
 							"table": {
 								"value": "@pipeline().parameters.table",
