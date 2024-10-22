@@ -63,8 +63,14 @@
 						"referenceName": "ds_datalake_parquet",
 						"type": "DatasetReference",
 						"parameters": {
-							"container": "raw",
-							"path": "postgres/sales_db"
+							"container": {
+								"value": "@pipeline().parameters.target_container",
+								"type": "Expression"
+							},
+							"path": {
+								"value": "@concat(pipeline().parameters.target_path, '/', pipeline().parameters.table)",
+								"type": "Expression"
+							}
 						}
 					}
 				]
@@ -78,6 +84,12 @@
 				"type": "string"
 			},
 			"table": {
+				"type": "string"
+			},
+			"target_container": {
+				"type": "string"
+			},
+			"target_path": {
 				"type": "string"
 			}
 		},
