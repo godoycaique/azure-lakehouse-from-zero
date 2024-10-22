@@ -1,0 +1,60 @@
+{
+	"name": "ds_postgres_db_read",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_postgres_db",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"server": {
+					"value": "@dataset().server",
+					"type": "Expression"
+				},
+				"database": {
+					"value": "@dataset().database",
+					"type": "Expression"
+				},
+				"user": {
+					"value": "@dataset().user",
+					"type": "Expression"
+				},
+				"password": {
+					"value": "@dataset().password",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"server": {
+				"type": "string"
+			},
+			"database": {
+				"type": "string"
+			},
+			"user": {
+				"type": "string"
+			},
+			"password": {
+				"type": "string"
+			},
+			"schema": {
+				"type": "string"
+			},
+			"table": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "PostgreSqlV2Table",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().table",
+				"type": "Expression"
+			}
+		}
+	}
+}
