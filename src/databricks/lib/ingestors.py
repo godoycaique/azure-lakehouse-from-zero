@@ -8,16 +8,13 @@ from delta import DeltaTable
 
 class Ingestor:
   
-    def __init__(self, spark, catalog, schema_name, table_name, data_format, write_mode):
+    def __init__(self, spark, catalog, database_name, table_name, source_format, write_mode):
         self.spark = spark
         self.catalog = catalog
-        self.schema_name = schema_name
+        self.database_name = database_name
         self.table_name = table_name
-        self.format = data_format
+        self.format = source_format
         self.mode = write_mode
-
-    def set_schema(self):
-        self.data_schema = utils.import_schema(self.table_name)
     
     def load(self, path):
         df = (self.spark
@@ -30,11 +27,11 @@ class Ingestor:
         (df.write
            .format("delta")
            .mode(self.mode)
-           .saveAsTable(f"{self.catalog}.{self.schema_name}.{self.table_name}"))
+           .saveAsTable(f"{self.catalog}.{self.database_name}.{self.table_name}"))
         return True
     
     def vacuum(self):
-        deltaTable = DeltaTable.forName(self.spark, f'{self.catalog}.{self.schema_name}.{self.table_name}')
+        deltaTable = DeltaTable.forName(self.spark, f'{self.catalog}.{self.database_name}.{self.table_name}')
         deltaTable.vacuum(720)
         return True
     

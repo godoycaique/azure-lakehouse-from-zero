@@ -21,14 +21,14 @@
 
 catalog = 'bronze'
 
-dbutils.widgets.text('schema_name', '')
+dbutils.widgets.text('database_name', '')
 dbutils.widgets.text('table_name', '')
-dbutils.widgets.text('data_format', '')
+dbutils.widgets.text('source_format', '')
 dbutils.widgets.text('write_mode', '')
 
-schema_name = dbutils.widgets.get('schema_name')
+database_name = dbutils.widgets.get('database_name')
 table_name = dbutils.widgets.get('table_name')
-data_format = dbutils.widgets.get('data_format')
+source_format = dbutils.widgets.get('source_format')
 write_mode = dbutils.widgets.get('write_mode')
 
 # COMMAND ----------
@@ -38,8 +38,8 @@ write_mode = dbutils.widgets.get('write_mode')
 
 # COMMAND ----------
 
-source_path =  f'/Volumes/raw/{schema_name}/sales_db/{table_name}'
-checkpoint_path = f'/Volumes/raw/{schema_name}/sales_db/{table_name}_checkpoint'
+source_path =  f'/Volumes/raw/{database_name}/sales_db/{table_name}'
+checkpoint_path = f'/Volumes/raw/{database_name}/sales_db/{table_name}_checkpoint'
 
 # COMMAND ----------
 
@@ -49,18 +49,22 @@ checkpoint_path = f'/Volumes/raw/{schema_name}/sales_db/{table_name}_checkpoint'
 
 # COMMAND ----------
 
-if not table_exists(spark, catalog, schema_name, table_name):
-    print(f'Table {schema_name}.{table_name} does not exist, creating now...')
+bronze_ingestion = Ingestor(spark          =   spark,
+                            catalog        =   catalog,
+                            database_name  =   database_name,
+                            table_name     =   table_name,
+                            source_format  =   source_format,
+                            write_mode     =   write_mode)
+
+# COMMAND ----------
+
+if not table_exists(spark, catalog, database_name, table_name):
+    print(f'Table {database_name}.{table_name} does not exist, creating now...')
 
     dbutils.fs.rm(checkpoint_path, recurse=True)
-    
-    bronze_ingestion = Ingestor(spark          =   spark,
-                                catalog        =   catalog,
-                                schema_name    =   schema_name,
-                                table_name     =   table_name,
-                                data_format    =   data_format,
-                                write_mode     =   write_mode)
     bronze_ingestion.execute_load(source_path)
     print('> Table created successfully')
 else:
-    print('> Table already exists')
+    print('> Table already exists, updating...')
+    bronze_ingestion.execute_load(source_path)
+    print(f'> Table updated successfully with {write_mode} mode...')

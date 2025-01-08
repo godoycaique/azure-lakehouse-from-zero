@@ -44,3 +44,7 @@ MANAGED LOCATION 'abfss://silver@adlsdataplatformdev.dfs.core.windows.net/unityc
 
 CREATE CATALOG IF NOT EXISTS gold
 MANAGED LOCATION 'abfss://gold@adlsdataplatformdev.dfs.core.windows.net/unitycatalog/'
+
+-- COMMAND ----------
+
+
